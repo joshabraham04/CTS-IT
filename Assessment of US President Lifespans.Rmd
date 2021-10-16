@@ -70,7 +70,8 @@ statistics <- data.frame(Min.=min(lived_days), Mean=mean(lived_days),
 kable(statistics, row.names=FALSE, align='c', caption="Summary Statistics of the Presidents' Lived Days")
 ```
 
-The tables above highlight the spread between presidential ages, with an average centered 24000 - 26000 days (~65 - 70 years) lived and a difference of 18465 days (51 years) between the two ends. Looking at the table, the majority of ages are close to each other, with the tail ends pulling out the distribution, as seen in the graph below:
+The tables above highlight the spread between presidential ages, with an average centered 24000 - 26000 days (~65 - 70 years) lived and a difference of 18465 days (51 years) between the two ends. 
+Looking at the table, the majority of ages are close to each other, with the tail ends pulling out the distribution, as seen in the graph below:
 
 ```{r echo=FALSE}
 hist(lived_days, 
