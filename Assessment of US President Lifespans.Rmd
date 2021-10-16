@@ -1,0 +1,86 @@
+---
+title: "\\vspace{-1.5cm} Assessment of US President Lifespans"
+author: "Josh Abraham"
+date: "10/14/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- Data import and separation -->
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Import the data set and remove the last row
+df <- read.csv("./U.S. Presidents Birth and Death Information - Sheet1.csv")
+df <- head(df, -1)
+
+year_of_birth <- as.Date(df$BIRTH.DATE, format="%b %d, %Y")
+year_of_death <- as.Date(df$DEATH.DATE, format="%b %d, %Y")
+# Replace NA values with current date for living presidents
+year_of_death[is.na(year_of_death)] <- Sys.Date()
+
+library(lubridate)
+lived_years = floor(lubridate::time_length(difftime(year_of_death, year_of_birth), "years"))
+lived_months = floor(lubridate::time_length(difftime(year_of_death, year_of_birth), "months"))
+lived_days = lubridate::time_length(difftime(year_of_death, year_of_birth), "days")
+
+df$DAYS <- lived_days
+df$MONTHS <- lived_months
+df$YEARS <- lived_years
+```
+
+## Introduction
+
+The intent of this report is to determine how the lifespans of U.S. presidents differ. The data was processed using a given CSV file in R and notably, the presidents with the longest lives, currently, are Jimmy Carter at 35443 days (97 yrs.), George Bush at 34504 days (94 yrs.), and Gerald Ford at 34133 days (93 yrs.). Whereas the shortest living presidents were JFK at 16978 days (46 years), James Garfield at 18202 days (49 yrs.) and James Polk at 19583 days (53 yrs.). With a spread of about 18465 days (51 years).
+
+## Body
+
+```{r echo=FALSE, message=FALSE}
+library(knitr)
+
+longest10 <- head(df[order(-df$DAYS),], 10)
+longest10$RANK <- 1:10
+shortest10 <- head(df[order(df$DAYS),], 10)
+shortest10$RANK <- 1:10
+```
+
+To calculate the lived days, months, and years, issues like leap years and living presidents had to be taken into account. For presidents still alive, age was calculated using the current date, and the R library `lubridate` and function `difftime` was utilized to handle the difference in dates for each variable. 
+
+```{r echo=FALSE}
+kable(longest10[,c(9,1,2,4,8,7,6)], row.names=FALSE, align='c', caption="Top 10 Longest Lived Presidents")
+```
+
+```{r echo=FALSE}
+kable(shortest10[,c(9,1,2,4,8,7,6)], row.names=FALSE, align='c', caption="Top 10 Shortest Lived Presidents")
+```
+
+```{r echo=FALSE}
+mode <- function(x){
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+} 
+statistics <- data.frame(Min.=min(lived_days), Mean=mean(lived_days),
+                         Weighted.Mean=weighted.mean(lived_days), 
+                         Max=max(lived_days),Median=median(lived_days),
+                         Mode=mode(lived_days), Standard.Deviation=sd(lived_days))
+kable(statistics, row.names=FALSE, align='c', caption="Summary Statistics of the Presidents' Lived Days")
+```
+
+The tables above highlight the spread between presidential ages, with an average centered 24000 - 26000 days (~65 - 70 years) lived and a difference of 18465 days (51 years) between the two ends. Looking at the table, the majority of ages are close to each other, with the tail ends pulling out the distribution, as seen in the graph below:
+
+```{r echo=FALSE}
+hist(lived_days, 
+     main="Distribution of the Lived Days of Presidents",
+     xlab="Number of Days Lived",
+     col="light blue",
+     breaks=10,
+     xlim=c(15000,40000),
+     ylab="Number of Presidents")
+```
+
+Similar to the tables above, the histogram gives an almost normal distribution, transitioning into an almost bi-modal distribution as the tail end on the right side rises. 
+
+## Conclusion
+
+Through analysis of the data, one conclusion of the data is that while although the data is seemingly distributed normally at a mean of 26366.71 days lived, the tail ends pull the data outwards, creating larger deviation in the data set. And significantly, Jimmy Carter is the longest lived president at 35443 days (97 years) while John F. Kennedy is the shortest lived at 16978 (46 years). It remains to be seen if there will be another rise in the number of days lived, considering how modern medicine affects the average lifespan and if the distribution will become bi-modal as later term presidents end up living longer. A plot of the lived days against the date of birth would provide insight into how presidential lifespan changes overtime.
